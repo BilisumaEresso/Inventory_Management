@@ -1,0 +1,22 @@
+# Composer dependencies
+/vendor/
+composer.phar
+
+# IDEs and local configurations
+/.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Developer temporary scripts
+/scratch/
+temp/
+tmp/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
