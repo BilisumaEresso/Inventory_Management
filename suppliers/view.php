@@ -135,7 +135,7 @@ require_once '../includes/layout-start.php';
                                         <?php echo $status['status']; ?>
                                     </span>
                                 </td>
-                                <td class="text-end fw-bold text-dark">$<?php echo number_format($product['price'], 2); ?></td>
+                                <td class="text-end fw-bold text-dark">ETB <?php echo number_format($product['price'], 2); ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

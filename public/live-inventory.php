@@ -1,9 +1,15 @@
+<?php
+/**
+ * Live Operations Dashboard - Smart Inventory Management System
+ * Synchronized with the SIMS light/clean design system.
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Operations Dashboard - Smart Inventory</title>
+    <title>Live Operations Dashboard - SIMS</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CSS -->
@@ -14,53 +20,52 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #030712; /* Deep Obsidian Black */
-            --card-bg: #0b0f19; /* Dense Slate Card */
-            --text-main: #f3f4f6; /* Off-White Main */
-            --text-muted: #6b7280; /* Neutral Muted */
-            --accent-green: #10b981; /* Emerald Green */
-            --accent-yellow: #f59e0b; /* Amber Amber */
-            --accent-red: #f43f5e; /* Rose Red */
-            --accent-blue: #3b82f6; /* Indigo Blue */
-            --border-subtle: rgba(255, 255, 255, 0.05);
+            --bg-color: #f4f7fe; /* Light gray background */
+            --card-bg: #ffffff; /* White cards */
+            --text-dark: #2b3674; /* Navy text */
+            --text-muted: #a3aed1; /* Gray text */
+            --primary-blue: #1366d9; /* SIMS primary blue */
+            --accent-green: #55b38a; /* SIMS green */
+            --accent-yellow: #f59e0b; /* Amber */
+            --accent-red: #f35588; /* SIMS red */
+            --border-subtle: #e9edf7;
         }
 
         body { 
             background-color: var(--bg-color); 
-            color: var(--text-main);
+            color: var(--text-dark);
             font-family: 'Inter', sans-serif;
             letter-spacing: -0.1px;
             overflow-x: hidden;
         }
 
-        /* Premium SaaS Card Styling */
+        /* SIMS Standard Card Styling */
         .card-custom { 
             background-color: var(--card-bg); 
-            border: 1px solid var(--border-subtle); 
+            border: none; 
             border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         
         .card-custom:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
         }
 
         .card-title-custom {
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             font-weight: 700;
         }
 
         /* Shimmer Animation loading slots */
         .shimmer-bg {
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.02) 75%);
+            background: linear-gradient(90deg, #f0f3fa 25%, #e2e8f0 50%, #f0f3fa 75%);
             background-size: 200% 100%;
-            animation: shimmer-pulse 1.8s infinite ease-in-out;
+            animation: shimmer-pulse 1.5s infinite ease-in-out;
         }
         @keyframes shimmer-pulse {
             0% { background-position: -200% 0; }
@@ -78,39 +83,36 @@
             display: inline-block;
         }
 
-        /* Valuation & Hero Typography */
+        /* Valuation Typography */
         .stat-value-custom { 
-            font-size: 2.8rem; 
+            font-size: 2.4rem; 
             font-weight: 800; 
             line-height: 1.1; 
-            background: linear-gradient(135deg, #ffffff 0%, #9ca3af 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-dark);
         }
 
         .stat-value-glow {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #3b82f6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* Health circles & indicator bars */
+        /* Health circles */
         .health-circle { 
             display: inline-block; 
             width: 10px; 
             height: 10px; 
             border-radius: 50%; 
             margin-right: 6px; 
-            box-shadow: 0 0 8px currentColor;
         }
         
         .text-green { color: var(--accent-green) !important; }
         .text-yellow { color: var(--accent-yellow) !important; }
         .text-red { color: var(--accent-red) !important; }
         
-        .bg-green { background-color: var(--accent-green); color: var(--accent-green); }
-        .bg-yellow { background-color: var(--accent-yellow); color: var(--accent-yellow); }
-        .bg-red { background-color: var(--accent-red); color: var(--accent-red); }
+        .bg-green { background-color: var(--accent-green); }
+        .bg-yellow { background-color: var(--accent-yellow); }
+        .bg-red { background-color: var(--accent-red); }
 
         .chart-container-custom { 
             position: relative; 
@@ -119,122 +121,108 @@
         }
         
         /* Table Layouts */
-        .table-custom { 
-            color: var(--text-main); 
-        }
         .table-custom th { 
-            background-color: rgba(255, 255, 255, 0.02); 
+            background-color: transparent; 
             color: var(--text-muted); 
             border-bottom: 1px solid var(--border-subtle);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             font-size: 11px;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             padding: 14px 18px;
         }
         .table-custom td {
             padding: 14px 18px;
             border-bottom: 1px solid var(--border-subtle);
             font-size: 13.5px;
-        }
-        .table-custom-hover tbody tr {
-            transition: background-color 0.2s ease;
+            color: var(--text-dark);
         }
         .table-custom-hover tbody tr:hover { 
-            background-color: rgba(255, 255, 255, 0.02); 
+            background-color: rgba(19, 102, 217, 0.02); 
         }
         
-        /* Translucent Badges */
+        /* SIMS Standard Badges */
         .badge-in { 
-            background-color: rgba(16, 185, 129, 0.1); 
+            background-color: rgba(85, 179, 138, 0.12); 
             color: var(--accent-green); 
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            padding: 4px 10px; 
-            font-size: 10px; 
-            font-weight: 600; 
+            padding: 5px 12px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            border-radius: 20px;
         }
         .badge-out { 
-            background-color: rgba(244, 63, 94, 0.1); 
+            background-color: rgba(243, 85, 136, 0.10); 
             color: var(--accent-red); 
-            border: 1px solid rgba(244, 63, 94, 0.2);
-            padding: 4px 10px; 
-            font-size: 10px; 
-            font-weight: 600; 
+            padding: 5px 12px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            border-radius: 20px;
         }
 
         /* Glowing Pulse Indicators */
         .pulse-indicator {
             display: inline-block;
-            width: 9px;
-            height: 9px;
+            width: 10px;
+            height: 10px;
             background-color: var(--accent-green);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-green);
+            box-shadow: 0 0 10px rgba(85, 179, 138, 0.5);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(85, 179, 138, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(85, 179, 138, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(85, 179, 138, 0); }
         }
 
         .btn-refresh-custom {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: #fff;
+            color: var(--text-dark);
             border: 1px solid var(--border-subtle);
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 0.8rem;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .btn-refresh-custom:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(19, 102, 217, 0.05);
+            color: var(--primary-blue);
+            border-color: rgba(19, 102, 217, 0.2);
         }
 
-        /* Custom scrollbar for operations feed */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.01);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body>
 
 <div class="container-fluid py-4 px-4" style="max-width: 1600px;">
     <!-- Top Welcome & Brand Banner -->
-    <div class="card-custom p-4 mb-4" style="background: linear-gradient(135deg, #0b0f19 0%, #030712 100%);">
+    <div class="card-custom p-4 mb-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center align-items-start gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="d-flex align-items-center justify-content-center shadow-sm" 
-                     style="width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%); color: white; font-weight: 800; font-size: 18px; letter-spacing: 0.5px;">
-                    LI
+                     style="width: 50px; height: 50px; border-radius: 12px; background: rgba(19, 102, 217, 0.1); color: var(--primary-blue); font-weight: 800; font-size: 20px;">
+                    <i class="bi bi-activity"></i>
                 </div>
                 <div>
-                    <h3 class="fw-bold text-main mb-0" style="letter-spacing: -0.5px;">Live Operations Room</h3>
-                    <p class="text-muted mb-0" style="font-size: 12px;">Executive warehouse sales throughput and inventory valuations dashboard.</p>
+                    <h4 class="fw-bold text-dark mb-0" style="letter-spacing: -0.5px;">Live Operations Room</h4>
+                    <p class="text-muted mb-0" style="font-size: 13px;">Real-time warehouse throughput and inventory dashboard.</p>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2 text-muted bg-dark rounded-pill px-3 py-1.5 border border-secondary border-opacity-10" style="font-size: 12px;">
+                <div class="d-flex align-items-center gap-2 text-dark bg-light rounded-pill px-3 py-2 border" style="font-size: 12px; font-weight: 600;">
                     <span class="pulse-indicator" id="pulseIndicator"></span>
-                    <span class="fw-semibold" style="letter-spacing: 0.5px;">SYSTEM LIVE</span>
+                    <span style="letter-spacing: 0.5px;">SYSTEM LIVE</span>
                 </div>
                 <button id="btnRefreshLive" class="btn btn-refresh-custom">
-                    <i class="bi bi-arrow-clockwise"></i> Refresh Sync
+                    <i class="bi bi-arrow-clockwise"></i> Sync
                 </button>
             </div>
         </div>
@@ -244,50 +232,60 @@
     <div class="row g-4 mb-4">
         <!-- Valuation -->
         <div class="col-lg-4 col-md-6 col-12">
-            <div class="card-custom h-100 p-4" style="background: linear-gradient(145deg, #0b0f19, #050811); border-left: 4px solid var(--accent-blue);">
-                <span class="card-title-custom d-block mb-2">Total Inventory Valuation</span>
-                <div class="d-flex align-items-center gap-3 mt-1">
-                    <i class="bi bi-cash-stack text-primary fs-3"></i>
-                    <div class="stat-value-custom stat-value-glow" id="valTotalValue">$0.00</div>
+            <div class="card-custom h-100 p-4 position-relative overflow-hidden">
+                <div class="position-absolute" style="top:-20px; right:-20px; opacity:0.03; transform:rotate(-15deg);">
+                    <i class="bi bi-cash-stack" style="font-size:120px;"></i>
                 </div>
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:42px;height:42px;background:rgba(19,102,217,.1);color:var(--primary-blue);">
+                        <i class="bi bi-currency-exchange fs-5"></i>
+                    </div>
+                    <span class="card-title-custom mb-0">Total Valuation</span>
+                </div>
+                <div class="stat-value-custom stat-value-glow mt-2" id="valTotalValue">ETB 0.00</div>
             </div>
         </div>
         <!-- Units -->
         <div class="col-lg-4 col-md-6 col-12">
-            <div class="card-custom h-100 p-4" style="background: linear-gradient(145deg, #0b0f19, #050811); border-left: 4px solid var(--accent-green);">
-                <span class="card-title-custom d-block mb-2">Total Active Stock Units</span>
-                <div class="d-flex align-items-center gap-3 mt-1">
-                    <i class="bi bi-box-seam text-green fs-3"></i>
-                    <div class="stat-value-custom" id="valTotalUnits">0</div>
+            <div class="card-custom h-100 p-4 position-relative overflow-hidden">
+                <div class="position-absolute" style="top:-20px; right:-20px; opacity:0.03; transform:rotate(-15deg);">
+                    <i class="bi bi-box-seam" style="font-size:120px;"></i>
                 </div>
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:42px;height:42px;background:rgba(85,179,138,.1);color:var(--accent-green);">
+                        <i class="bi bi-boxes fs-5"></i>
+                    </div>
+                    <span class="card-title-custom mb-0">Active Stock Units</span>
+                </div>
+                <div class="stat-value-custom mt-2" id="valTotalUnits">0</div>
             </div>
         </div>
         <!-- Health Breakdown -->
         <div class="col-lg-4 col-12">
             <div class="card-custom h-100 p-4">
-                <span class="card-title-custom d-block mb-3">Warehouse Stock Health Indicators</span>
+                <span class="card-title-custom d-block mb-3"><i class="bi bi-heart-pulse me-1"></i> Stock Health Indicators</span>
                 <div class="d-flex justify-content-between align-items-center mt-2 px-1">
                     <!-- Healthy -->
-                    <div class="text-center bg-dark bg-opacity-50 rounded-3 p-2 border border-secondary border-opacity-10" style="flex-grow: 1; margin: 0 4px;">
+                    <div class="text-center bg-light rounded-3 p-2 border" style="flex-grow: 1; margin: 0 4px;">
                         <div class="d-flex align-items-center justify-content-center mb-1 gap-1">
                             <span class="health-circle bg-green"></span>
-                            <span class="fw-bold text-green fs-4" id="valHealthGreen">0</span>
+                            <span class="fw-bold text-dark fs-4" id="valHealthGreen">0</span>
                         </div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Healthy (10+)</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Healthy (15+)</div>
                     </div>
                     <!-- Low -->
-                    <div class="text-center bg-dark bg-opacity-50 rounded-3 p-2 border border-secondary border-opacity-10" style="flex-grow: 1; margin: 0 4px;">
+                    <div class="text-center bg-light rounded-3 p-2 border" style="flex-grow: 1; margin: 0 4px;">
                         <div class="d-flex align-items-center justify-content-center mb-1 gap-1">
                             <span class="health-circle bg-yellow"></span>
-                            <span class="fw-bold text-yellow fs-4" id="valHealthYellow">0</span>
+                            <span class="fw-bold text-dark fs-4" id="valHealthYellow">0</span>
                         </div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Low Stock (&lt;10)</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Low (&lt;15)</div>
                     </div>
                     <!-- Out -->
-                    <div class="text-center bg-dark bg-opacity-50 rounded-3 p-2 border border-secondary border-opacity-10" style="flex-grow: 1; margin: 0 4px;">
+                    <div class="text-center bg-light rounded-3 p-2 border" style="flex-grow: 1; margin: 0 4px;">
                         <div class="d-flex align-items-center justify-content-center mb-1 gap-1">
                             <span class="health-circle bg-red"></span>
-                            <span class="fw-bold text-red fs-4" id="valHealthRed">0</span>
+                            <span class="fw-bold text-dark fs-4" id="valHealthRed">0</span>
                         </div>
                         <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Out of Stock</div>
                     </div>
@@ -301,9 +299,9 @@
         <!-- Category Distribution -->
         <div class="col-lg-6 col-12">
             <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2 mb-4">
                     <i class="bi bi-pie-chart text-primary fs-5"></i>
-                    <h5 class="fw-bold text-main mb-0" style="font-size: 15px;">Stock Category Capacity Distribution</h5>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 16px;">Category Distribution</h6>
                 </div>
                 <div class="chart-container-custom">
                     <canvas id="categoryChart"></canvas>
@@ -313,9 +311,9 @@
         <!-- Trend Activity -->
         <div class="col-lg-6 col-12">
             <div class="card-custom p-4">
-                <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2 mb-4">
                     <i class="bi bi-graph-up text-green fs-5"></i>
-                    <h5 class="fw-bold text-main mb-0" style="font-size: 15px;">Daily Activity Volume (7 Days Trend)</h5>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 16px;">Daily Activity Volume</h6>
                 </div>
                 <div class="chart-container-custom">
                     <canvas id="lineChart"></canvas>
@@ -328,10 +326,10 @@
     <div class="row g-4">
         <!-- Live Activity Feed Table -->
         <div class="col-lg-8 col-12">
-            <div class="card-custom h-100">
-                <div class="d-flex align-items-center gap-2 p-4 pb-3 border-bottom" style="border-color: var(--border-subtle) !important;">
-                    <i class="bi bi-activity text-danger fs-5"></i>
-                    <h5 class="fw-bold text-main mb-0" style="font-size: 15px;">Chronological Operations Feed</h5>
+            <div class="card-custom h-100 p-0 overflow-hidden">
+                <div class="d-flex align-items-center gap-2 p-4 pb-3 border-bottom">
+                    <i class="bi bi-clock-history text-primary fs-5"></i>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 16px;">Chronological Operations Feed</h6>
                 </div>
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-custom table-custom-hover align-middle mb-0">
@@ -372,9 +370,9 @@
         <!-- Top Products Leaderboard Column -->
         <div class="col-lg-4 col-12">
             <div class="card-custom h-100 p-4">
-                <div class="d-flex align-items-center gap-2 mb-3 border-bottom pb-3" style="border-color: var(--border-subtle) !important;">
+                <div class="d-flex align-items-center gap-2 mb-4 border-bottom pb-3">
                     <i class="bi bi-trophy text-yellow fs-5"></i>
-                    <h5 class="fw-bold text-main mb-0" style="font-size: 15px;">Top Moving Products Leaderboard</h5>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 16px;">Top Moving Products</h6>
                 </div>
                 <div class="d-flex flex-column" id="topProductsBody">
                     <!-- Shimmering Skeleton Loader Lists -->
@@ -411,17 +409,17 @@
     let categoryChartInstance = null;
     let lineChartInstance = null;
 
-    // Formatting tools
-    const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    // Formatting tools (Updated for ETB)
+    const formatCurrency = (val) => 'ETB ' + new Intl.NumberFormat('en-US').format(val);
     const formatDate = (dateString) => {
         const d = new Date(dateString);
         return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }) + ' - ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
-    // Initialize charts with clean slate styling config
+    // Initialize charts with light mode styling config
     function initCharts() {
-        Chart.defaults.color = '#9ca3af';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.color = '#a3aed1';
+        Chart.defaults.font.family = 'Inter';
 
         // Category capacity distribution donut chart
         const catCtx = document.getElementById('categoryChart').getContext('2d');
@@ -431,9 +429,9 @@
                 labels: [], 
                 datasets: [{ 
                     data: [], 
-                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#8b5cf6', '#ec4899'], 
+                    backgroundColor: ['#1366d9', '#55b38a', '#f59e0b', '#f35588', '#06b6d4', '#8b5cf6', '#ec4899'], 
                     borderWidth: 2,
-                    borderColor: '#0b0f19'
+                    borderColor: '#ffffff'
                 }] 
             },
             options: { 
@@ -444,7 +442,8 @@
                         position: 'right', 
                         labels: { 
                             font: { size: 12, family: 'Inter', weight: '500' },
-                            padding: 15
+                            padding: 15,
+                            color: '#2b3674'
                         } 
                     } 
                 },
@@ -461,18 +460,18 @@
                 responsive: true, 
                 maintainAspectRatio: false, 
                 elements: { 
-                    line: { tension: 0.15, borderWidth: 3 }, 
-                    point: { radius: 4, hitRadius: 10 } 
+                    line: { tension: 0.3, borderWidth: 3 }, 
+                    point: { radius: 4, hitRadius: 10, backgroundColor: '#ffffff', borderWidth: 2 } 
                 }, 
                 scales: { 
                     y: { 
                         beginAtZero: true, 
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { font: { family: 'Inter', size: 10 } }
+                        grid: { color: '#e9edf7' },
+                        ticks: { font: { family: 'Inter', size: 11 }, color: '#a3aed1' }
                     },
                     x: { 
                         grid: { display: false },
-                        ticks: { font: { family: 'Inter', size: 10 } }
+                        ticks: { font: { family: 'Inter', size: 11 }, color: '#a3aed1' }
                     }
                 },
                 plugins: { legend: { display: false } }
@@ -485,24 +484,20 @@
     // Fetch and sync dashboard metrics
     async function fetchLiveData() {
         try {
-            // Pulsing blue lock while syncing
+            // Pulsing blue while syncing
             const pulse = document.getElementById('pulseIndicator');
-            pulse.style.backgroundColor = '#3b82f6';
-            pulse.style.boxShadow = '0 0 10px #3b82f6';
+            pulse.style.backgroundColor = '#1366d9';
+            pulse.style.boxShadow = '0 0 10px rgba(19, 102, 217, 0.5)';
             
-            const response = await fetch('api/live_data.php');
+            const response = await fetch('../api/live_data.php');
             const textData = await response.text();
             
             pulse.style.backgroundColor = 'var(--accent-green)';
-            pulse.style.boxShadow = '0 0 10px var(--accent-green)';
+            pulse.style.boxShadow = '0 0 10px rgba(85, 179, 138, 0.5)';
 
             // Smart sync: don't re-render unless hash modified
-            if (textData === lastDataHash) {
-                console.log('Operational room stats unchanged. Skipping render cycle.');
-                return;
-            }
+            if (textData === lastDataHash) return;
             
-            console.log('Inventory state change recognized. Redrawing dashboard layout.');
             lastDataHash = textData;
             const data = JSON.parse(textData);
 
@@ -528,8 +523,8 @@
                 lineChartInstance.data.datasets = [{
                     label: 'Transaction Volume',
                     data: data.charts.line.data,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                    borderColor: '#1366d9',
+                    backgroundColor: 'rgba(19, 102, 217, 0.05)',
                     fill: true
                 }];
                 lineChartInstance.update();
@@ -544,13 +539,13 @@
                 data.recent_activity.forEach(item => {
                     const isOut = item.movement_type === 'OUT';
                     const badgeClass = isOut ? 'badge-out' : 'badge-in';
-                    const icon = isOut ? '<i class="bi bi-arrow-up-right"></i>' : '<i class="bi bi-arrow-down-left"></i>';
+                    const icon = isOut ? '↓' : '↑';
                     
                     recentBody.innerHTML += `
                         <tr>
                             <td class="ps-4 text-muted">${formatDate(item.created_at)}</td>
-                            <td class="fw-bold text-main">${item.product_name}</td>
-                            <td class="text-center"><span class="badge ${badgeClass} rounded-pill">${icon} ${item.movement_type}</span></td>
+                            <td class="fw-semibold text-dark">${item.product_name}</td>
+                            <td class="text-center"><span class="${badgeClass}">${icon} ${item.movement_type}</span></td>
                             <td class="text-end pe-4 fw-bold ${isOut ? 'text-red' : 'text-green'}" style="font-size: 15px;">${isOut ? '-' : '+'}${parseInt(item.quantity).toLocaleString()}</td>
                         </tr>
                     `;
@@ -573,13 +568,13 @@
                     topBody.innerHTML += `
                         <div class="d-flex flex-column mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold d-flex align-items-center gap-2" style="font-size: 13.5px;">
+                                <span class="fw-semibold d-flex align-items-center gap-2" style="font-size: 13.5px; color: var(--text-dark);">
                                     <span class="badge ${colorClass} rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 9px; padding: 0;">${index + 1}</span>
-                                    <span class="text-main">${item.name}</span>
+                                    <span>${item.name}</span>
                                 </span>
-                                <span class="fw-bold text-muted" style="font-size: 12.5px;">${parseInt(item.total_out).toLocaleString()} units</span>
+                                <span class="fw-semibold text-muted" style="font-size: 12px;">${parseInt(item.total_out).toLocaleString()} units</span>
                             </div>
-                            <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.04); border-radius: 4px;">
+                            <div class="progress" style="height: 6px; background-color: #e9edf7; border-radius: 4px;">
                                 <div class="progress-bar ${colorClass}" role="progressbar" style="width: ${percent}%; border-radius: 4px;"></div>
                             </div>
                         </div>
@@ -590,7 +585,7 @@
         } catch (error) {
             console.error('Operations room sync failure:', error);
             document.getElementById('pulseIndicator').style.backgroundColor = 'var(--accent-red)';
-            document.getElementById('pulseIndicator').style.boxShadow = '0 0 10px var(--accent-red)';
+            document.getElementById('pulseIndicator').style.boxShadow = '0 0 10px rgba(243, 85, 136, 0.5)';
         }
     }
 

@@ -4,7 +4,7 @@
 $prefix = isset($path_prefix) ? $path_prefix : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,13 +16,92 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
     <!-- Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script>
+        // Immediate Theme Check to Prevent Styling Flash
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
+    
     <style>
+        :root {
+            --body-bg: #f4f6f9;
+            --body-color: #4b5563;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #f0f1f3;
+            --navbar-bg: #ffffff;
+            --navbar-border: #f0f1f3;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-color: #1d1f2c;
+            --input-bg: #f9fafb;
+            --input-border: #d1d5db;
+            --input-color: #1f2937;
+            --table-th-bg: #f9fafb;
+            --table-th-border: #f3f4f6;
+            --table-td-color: #1f2937;
+            --table-td-border: #f3f4f6;
+            --text-dark: #1d1f2c;
+            --text-muted: #667085;
+            --shadow-intensity: rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: rgba(0, 0, 0, 0.04);
+            
+            /* Sidebar Menu Variables */
+            --menu-item-color: #5d6679;
+            --menu-item-active-bg: rgba(19, 102, 217, 0.08);
+            --menu-item-active-color: #1366d9;
+            --menu-item-hover-bg: rgba(19, 102, 217, 0.04);
+            --menu-item-hover-color: #1366d9;
+            --menu-item-shadow: none;
+        }
+
+        [data-bs-theme="dark"] {
+            --body-bg: #0f172a;
+            --body-color: #cbd5e1;
+            --sidebar-bg: #090d16;
+            --sidebar-border: rgba(255, 255, 255, 0.05);
+            --navbar-bg: rgba(15, 23, 42, 0.85);
+            --navbar-border: rgba(255, 255, 255, 0.08);
+            --card-bg: #1e293b;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-color: #e2e8f0;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --input-color: #f8fafc;
+            --table-th-bg: #1e293b;
+            --table-th-border: rgba(255, 255, 255, 0.08);
+            --table-td-color: #cbd5e1;
+            --table-td-border: rgba(255, 255, 255, 0.04);
+            --text-dark: #f8fafc;
+            --text-muted: #94a3b8;
+            --shadow-intensity: rgba(0, 0, 0, 0.2);
+            --card-hover-shadow: rgba(0, 0, 0, 0.3);
+            
+            /* Sidebar Menu Variables */
+            --menu-item-color: #94a3b8;
+            --menu-item-active-bg: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --menu-item-active-color: #ffffff;
+            --menu-item-hover-bg: rgba(255, 255, 255, 0.05);
+            --menu-item-hover-color: #ffffff;
+            --menu-item-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #334155;
+            background-color: var(--body-bg);
+            color: var(--body-color);
             overflow-x: hidden;
             letter-spacing: -0.1px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Utility Override classes */
+        .text-dark {
+            color: var(--text-dark) !important;
+        }
+        .text-secondary, .text-muted {
+            color: var(--text-muted) !important;
         }
         
         /* Admin Layout Grid */
@@ -37,8 +116,8 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         /* Sidebar Styles */
         .sidebar {
             width: 280px;
-            background-color: #0f172a;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -51,7 +130,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         
         .sidebar-header {
             padding: 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -67,7 +146,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
         }
         
         .sidebar-menu {
@@ -97,25 +176,25 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
-            color: #94a3b8;
+            color: var(--menu-item-color);
             text-decoration: none;
             border-radius: 12px;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 14.5px;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .menu-item a:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
+            background-color: var(--menu-item-hover-bg);
+            color: var(--menu-item-hover-color);
             transform: translateX(4px);
         }
         
         .menu-item.active a {
-            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-            color: #ffffff;
+            background: var(--menu-item-active-bg) !important;
+            color: var(--menu-item-active-color) !important;
             font-weight: 600;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+            box-shadow: var(--menu-item-shadow) !important;
         }
         
         .menu-item a i {
@@ -135,17 +214,17 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: #f8fafc;
+            background-color: var(--body-bg);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         /* Top Navbar Styles */
         .top-navbar {
             height: 70px;
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: var(--navbar-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--navbar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -153,6 +232,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             position: sticky;
             top: 0;
             z-index: 1020;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
         .navbar-left {
@@ -164,7 +244,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 20px;
         }
         
         .user-profile {
@@ -190,26 +270,28 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         
         /* Modern Design Overrides */
         .card, .card-custom {
-            background: #ffffff !important;
-            border: 1px solid rgba(226, 232, 240, 0.8) !important;
-            border-radius: 16px !important; /* rounded-4 */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.015) !important; /* shadow-sm */
+            background: var(--card-bg) !important;
+            border: 1px solid var(--card-border) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 4px 6px -1px var(--shadow-intensity), 0 2px 4px -1px var(--shadow-intensity) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            color: var(--card-color) !important;
         }
         
         .card:hover, .card-custom:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+            box-shadow: 0 10px 15px -3px var(--card-hover-shadow), 0 4px 6px -2px var(--card-hover-shadow) !important;
         }
         
         /* Forms styling */
         .form-control, .form-select {
-            border: 1px solid #cbd5e1 !important;
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
             border-radius: 10px !important;
             padding: 10px 14px !important;
             font-size: 14px !important;
             transition: all 0.2s ease-in-out !important;
-            color: #334155 !important;
+            color: var(--input-color) !important;
         }
         
         .form-control:focus, .form-select:focus {
@@ -217,10 +299,15 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
             outline: 0 !important;
         }
+
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.6;
+        }
         
         .form-label {
             font-weight: 600 !important;
-            color: #475569 !important;
+            color: var(--text-dark) !important;
             margin-bottom: 6px !important;
             font-size: 13px !important;
         }
@@ -260,18 +347,19 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         }
         
         .btn-outline-secondary, .btn-outline-dark {
-            border: 1.5px solid #cbd5e1 !important;
-            color: #475569 !important;
+            border: 1.5px solid var(--input-border) !important;
+            color: var(--body-color) !important;
             border-radius: 30px !important;
             padding: 8px 20px !important;
             font-weight: 600 !important;
+            background-color: var(--card-bg) !important;
             transition: all 0.2s ease-in-out !important;
         }
         
         .btn-outline-secondary:hover, .btn-outline-dark:hover {
-            background-color: #f1f5f9 !important;
-            color: #0f172a !important;
-            border-color: #cbd5e1 !important;
+            background-color: var(--body-bg) !important;
+            color: var(--text-dark) !important;
+            border-color: var(--input-border) !important;
         }
         
         /* Modern Spacious Tables */
@@ -280,6 +368,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             border-spacing: 0 0 !important;
             width: 100% !important;
             margin-bottom: 0 !important;
+            background-color: transparent !important;
         }
         
         .table th {
@@ -287,18 +376,19 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             text-transform: uppercase !important;
             font-size: 11px !important;
             letter-spacing: 0.5px !important;
-            color: #64748b !important;
-            background-color: #f8fafc !important;
-            border-bottom: 2px solid #e2e8f0 !important;
+            color: var(--text-muted) !important;
+            background-color: var(--table-th-bg) !important;
+            border-bottom: 2px solid var(--table-th-border) !important;
             padding: 16px 20px !important;
         }
         
         .table td {
             padding: 16px 20px !important;
             font-size: 14px !important;
-            color: #334155 !important;
-            border-bottom: 1px solid #f1f5f9 !important;
+            color: var(--table-td-color) !important;
+            border-bottom: 1px solid var(--table-td-border) !important;
             vertical-align: middle !important;
+            background-color: transparent !important;
         }
         
         .table-hover tbody tr {
@@ -306,7 +396,7 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
         }
         
         .table-hover tbody tr:hover {
-            background-color: #f8fafc !important;
+            background-color: var(--table-th-bg) !important;
         }
         
         /* Status Badges */
@@ -335,14 +425,14 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: var(--body-bg);
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: var(--input-border);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: var(--text-muted);
         }
         
         /* Responsive Layout adjustments */

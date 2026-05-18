@@ -175,7 +175,7 @@ require_once '../includes/layout-start.php';
                 <!-- Hero Price -->
                 <div class="bg-light rounded-4 p-3 mb-4">
                     <div class="text-muted uppercase fw-semibold mb-1" style="font-size: 11px; letter-spacing: 0.5px;">UNIT PRICE</div>
-                    <h3 class="fw-bold text-primary mb-0">$<?php echo htmlspecialchars(number_format($product['price'], 2)); ?></h3>
+                    <h3 class="fw-bold text-primary mb-0">ETB <?php echo htmlspecialchars(number_format($product['price'], 2)); ?></h3>
                 </div>
                 
                 <!-- Profile specs -->

@@ -76,15 +76,14 @@ require_once '../includes/layout-start.php';
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-0 text-dark">📦 Stock Adjustment</h4>
-        <p class="text-muted mb-0" style="font-size: 13px;">Perform manual stock intake or log sales deductions securely.</p>
+        <h5 class="fw-bold mb-0 text-dark" style="font-family:'Inter',sans-serif;font-size:18px;">New Stock Movement</h5>
+        <p class="text-muted mb-0" style="font-size:12px;">Log stock intake (IN) or dispatch (OUT) against any product.</p>
     </div>
-    <div>
-        <a href="history.php" class="btn btn-outline-secondary btn-sm px-3 rounded-pill shadow-sm">
-            <i class="bi bi-clock-history"></i> Audit Trail
-        </a>
-    </div>
+    <a href="history.php" class="btn btn-outline-secondary px-4 py-2 rounded-3 d-flex align-items-center gap-2" style="font-weight:600;font-size:13px;">
+        <i class="bi bi-clock-history"></i> View History
+    </a>
 </div>
+
 
 <div class="row">
     <div class="col-lg-8 col-12 mx-auto">

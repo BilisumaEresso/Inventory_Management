@@ -9,6 +9,8 @@ define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '[7eu!5)!KiL@ShO@');
 define('DB_NAME', 'smart_inventory');
+define('GOOGLE_CLIENT_ID', ''); // Set your Google Client ID here for live OAuth
+
 
 try {
     // Create PDO connection

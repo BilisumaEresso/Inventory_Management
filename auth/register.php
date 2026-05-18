@@ -1,7 +1,7 @@
 <?php
 /**
- * Login Screen - Smart Inventory Management System (SIMS)
- * Beautiful split-screen design matching Figma specs, dark/light theme, and Google login
+ * Register Screen - Smart Inventory Management System (SIMS)
+ * Beautiful split-screen design matching Figma specs, dark/light theme, and Google signup
  */
 session_start();
 require_once '../config/db.php';
@@ -13,50 +13,64 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 }
 
 $error_message = '';
+$success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // We check both username and email for premium usability and backwards compatibility
-    $login_input = trim($_POST['login_input'] ?? '');
+    $fullname = trim($_POST['fullname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    if (empty($login_input) || empty($password)) {
-        $error_message = 'Please fill all fields';
+    // Server-side validation
+    if (empty($fullname) || empty($email) || empty($password)) {
+        $error_message = 'Please fill all required fields';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error_message = 'Please enter a valid email address';
+    } elseif (strlen($password) < 8) {
+        $error_message = 'Password must be at least 8 characters long';
     } else {
         try {
-            // Find user by username OR email
-            $stmt = $pdo->prepare('SELECT id, username, email, fullname, password, status FROM users WHERE username = ? OR email = ? LIMIT 1');
-            $stmt->execute([$login_input, $login_input]);
-            $user = $stmt->fetch();
-
-            // Verify password
-            if ($user && password_verify($password, $user['password'])) {
-                $status = $user['status'] ?? 'PENDING';
-
-                if ($status === 'BANNED' || $status === 'DECLINED') {
-                    $error_message = 'Your account has been banned or declined by the administrator.';
-                } else {
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['username'] = $user['fullname'] ?? $user['username'];
-                    $_SESSION['email'] = $user['email'] ?? '';
-                    $_SESSION['logged_in'] = true;
-
-                    if ($status === 'PENDING') {
-                        $_SESSION['flash_msg'] = "Account created! Please wait for admin approval.";
-                        $_SESSION['flash_type'] = "info";
-                        header('Location: pending.php');
-                    } else {
-                        $_SESSION['flash_msg'] = "Welcome back, " . ($_SESSION['username']) . "!";
-                        $_SESSION['flash_type'] = "success";
-                        header('Location: ../dashboard.php');
-                    }
-                    exit;
-                }
+            // Check if email already exists
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $error_message = 'An account with this email already exists';
             } else {
-                $error_message = 'Invalid email/username or password';
+                // Generate unique username from name or email
+                $base_username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode('@', $email)[0]));
+                $username = $base_username;
+                
+                // Idempotency: append suffix if username exists
+                $check_stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+                $check_stmt->execute([$username]);
+                if ($check_stmt->fetch()) {
+                    $username = $base_username . rand(100, 999);
+                }
+
+                $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+                // Insert into users
+                $insert_stmt = $pdo->prepare('
+                    INSERT INTO users (username, email, fullname, password, status) 
+                    VALUES (?, ?, ?, ?, "PENDING")
+                ');
+                $insert_stmt->execute([$username, $email, $fullname, $hashed_password]);
+                $user_id = $pdo->lastInsertId();
+
+                // Log the user in
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['username'] = $fullname;
+                $_SESSION['email'] = $email;
+                $_SESSION['logged_in'] = true;
+
+                $_SESSION['flash_msg'] = "Account created successfully! Please wait for admin approval.";
+                $_SESSION['flash_type'] = "success";
+
+                header('Location: pending.php');
+                exit;
             }
         } catch (PDOException $e) {
             $error_message = 'Database error. Please try again.';
-            error_log('Login Database Error: ' . $e->getMessage());
+            error_log('Registration Database Error: ' . $e->getMessage());
         }
     }
 }
@@ -66,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in to your account - SIMS</title>
+    <title>Create an Account - SIMS</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CSS -->
@@ -250,6 +264,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 0.6;
         }
 
+        .input-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
         /* Checkbox styling */
         .form-check-input {
             border-color: var(--input-border) !important;
@@ -262,8 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .form-check-label {
             font-size: 13.5px;
-            color: var(--text-main);
-            font-weight: 500;
+            color: var(--text-muted);
             cursor: pointer;
         }
 
@@ -287,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 6px 16px rgba(13, 110, 253, 0.3) !important;
         }
 
-        /* Google button */
+        /* Google Sign Up button */
         .btn-google {
             background-color: var(--btn-google-bg) !important;
             border: 1px solid var(--btn-google-border) !important;
@@ -308,6 +327,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-google:hover {
             background-color: var(--btn-google-hover) !important;
             transform: translateY(-1px) !important;
+        }
+
+        .btn-google svg {
+            width: 18px;
+            height: 18px;
         }
 
         .divider-container {
@@ -510,8 +534,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="../assets/images/logo.png" style="width: 100%; height: auto;" alt="SIMS Icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5164/5164023.png';">
                 </div>
 
-                <h2 class="form-title">Log in to your account</h2>
-                <p class="form-subtitle">Welcome back! Please enter your details.</p>
+                <h2 class="form-title">Create an account</h2>
+                <p class="form-subtitle">Start your 30-day free trial.</p>
 
                 <?php if ($error_message): ?>
                     <div class="alert-custom">
@@ -520,42 +544,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" autocomplete="off" id="loginForm">
+                <form method="POST" autocomplete="off" id="signupForm">
                     
                     <div class="mb-3">
-                        <label for="login_input" class="form-label">Email or Username</label>
-                        <input type="text" id="login_input" name="login_input" class="form-control" placeholder="Enter your email or username" required>
+                        <label for="fullname" class="form-label">Name*</label>
+                        <input type="text" id="fullname" name="fullname" class="form-control" placeholder="Enter your name" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <label for="email" class="form-label">Email*</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">Remember for 30 days</label>
-                        </div>
-                        <a href="#" class="fw-semibold text-decoration-none" style="font-size: 13.5px; color: #0d6efd;" onclick="alert('Password reset link simulation sent!')">Forgot password</a>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password*</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Create a password" required minlength="8">
+                        <div class="input-hint">Must be at least 8 characters.</div>
                     </div>
 
-                    <button type="submit" class="btn btn-submit mb-3">Sign in</button>
+                    <button type="submit" class="btn btn-submit mb-3">Get started</button>
 
-                    <button type="button" class="btn btn-google" id="googleSignInBtn">
+                    <button type="button" class="btn btn-google" id="googleSignUpBtn">
                         <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
                         </svg>
-                        Sign in with Google
+                        Sign up with Google
                     </button>
 
                 </form>
 
                 <div class="form-footer">
-                    Don’t have an account? <a href="register.php">Sign up</a>
+                    Already have an account? <a href="login.php">Log in</a>
                 </div>
 
             </div>
@@ -645,11 +667,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // GOOGLE SIGN IN & SIMULATOR LOGIC
         // ----------------------------------------------------
         const googleClientId = '<?php echo GOOGLE_CLIENT_ID; ?>';
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const googleSignUpBtn = document.getElementById('googleSignUpBtn');
         const googleMockModal = document.getElementById('googleMockModal');
         const mockModalCloseBtn = document.getElementById('mockModalCloseBtn');
 
-        googleSignInBtn.addEventListener('click', () => {
+        googleSignUpBtn.addEventListener('click', () => {
             if (googleClientId && googleClientId !== '') {
                 // Trigger real Google GIS prompt (in case they have it loaded and active)
                 try {
@@ -704,9 +726,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Submits auth info to the backend securely
         function submitGoogleAuth(payload) {
-            // Show loading indicators
-            googleSignInBtn.disabled = true;
-            googleSignInBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            // Show loading indicators if wanted
+            googleSignUpBtn.disabled = true;
+            googleSignUpBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
 
             fetch('google-auth.php', {
                 method: 'POST',
@@ -732,15 +754,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function resetGoogleButton() {
-            googleSignInBtn.disabled = false;
-            googleSignInBtn.innerHTML = `
+            googleSignUpBtn.disabled = false;
+            googleSignUpBtn.innerHTML = `
                 <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
                 </svg>
-                Sign in with Google
+                Sign up with Google
             `;
         }
     </script>
