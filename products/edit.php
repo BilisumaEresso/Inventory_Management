@@ -69,6 +69,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('UPDATE products SET name = ?, category_id = ?, category = ?, price = ?, sku = ?, description = ?, supplier_id = ? WHERE id = ?');
             $stmt->execute([$name, $category_id, $category_name, (float)$price, $sku, $description, $supplier_id_input, $product_id]);
 
+            // Handle Image Upload
+            if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
+                $tmp_name = $_FILES['product_image']['tmp_name'];
+                $ext = strtolower(pathinfo($_FILES['product_image']['name'], PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                
+                if (in_array($ext, $allowed)) {
+                    // Delete old images
+                    $existing = glob('../uploads/products/product_' . $product_id . '.*');
+                    if ($existing) {
+                        foreach($existing as $file) {
+                            @unlink($file);
+                        }
+                    }
+                    
+                    $filename = 'product_' . $product_id . '.' . $ext;
+                    move_uploaded_file($tmp_name, '../uploads/products/' . $filename);
+                }
+            }
+
             // Redirect back to list
             $_SESSION['flash_msg'] = 'Product "' . $name . '" updated successfully.';
             $_SESSION['flash_type'] = 'success';
@@ -118,11 +138,27 @@ require_once '../includes/layout-start.php';
         <!-- Form Card -->
         <?php if ($product): ?>
         <div class="card card-custom border-0 shadow-sm p-4 mb-4">
-            <form method="POST" class="row g-4">
+            <form method="POST" enctype="multipart/form-data" class="row g-4">
                 <!-- Name -->
                 <div class="col-12">
                     <label for="name" class="form-label fw-semibold text-secondary">Product Name *</label>
                     <input type="text" id="name" name="name" class="form-control p-3 rounded-3" required value="<?php echo htmlspecialchars($product['name']); ?>" placeholder="e.g. Dell XPS 15 Laptop">
+                </div>
+
+                <!-- Product Image -->
+                <div class="col-12">
+                    <label for="product_image" class="form-label fw-semibold text-secondary">Product Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <?php 
+                            $images = glob('../uploads/products/product_' . $product_id . '.*');
+                            $current_image = $images ? $images[0] : 'https://cdn-icons-png.flaticon.com/512/5164/5164023.png';
+                        ?>
+                        <img src="<?php echo $current_image; ?>" alt="Product Image" class="rounded-3 shadow-sm border" style="width: 60px; height: 60px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <input type="file" id="product_image" name="product_image" class="form-control p-3 rounded-3" accept="image/*">
+                            <div class="form-text" style="font-size: 11px;">Upload a new image to replace the current one (JPG, PNG, WEBP).</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Category -->
@@ -159,9 +195,9 @@ require_once '../includes/layout-start.php';
 
                 <!-- Price -->
                 <div class="col-md-6">
-                    <label for="price" class="form-label fw-semibold text-secondary">Price ($) *</label>
+                    <label for="price" class="form-label fw-semibold text-secondary">Price (ETB) *</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light">$</span>
+                        <span class="input-group-text bg-light">ETB</span>
                         <input type="number" id="price" name="price" class="form-control p-3 rounded-end-3" min="0" step="0.01" required value="<?php echo htmlspecialchars($product['price']); ?>" placeholder="0.00">
                     </div>
                 </div>

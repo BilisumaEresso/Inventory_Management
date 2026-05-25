@@ -291,14 +291,23 @@ require_once '../includes/layout-start.php';
                     ?>
                     <tr>
                         <td>
-                            <a href="view.php?id=<?php echo $product['id']; ?>" class="fw-bold text-dark text-decoration-none d-block mb-0.5" style="font-family: 'Inter', sans-serif;">
-                                <?php echo htmlspecialchars($product['name']); ?>
-                            </a>
-                            <small class="text-secondary fw-semibold" style="font-size: 11px;">
-                                <span class="bg-light px-2 py-0.5 rounded border text-muted">
-                                    <?php echo htmlspecialchars($product['category_name'] ?? $product['category'] ?? 'Other'); ?>
-                                </span>
-                            </small>
+                            <div class="d-flex align-items-center gap-3">
+                                <?php 
+                                    $images = glob('../uploads/products/product_' . $product['id'] . '.*');
+                                    $current_image = $images ? $images[0] : 'https://cdn-icons-png.flaticon.com/512/5164/5164023.png';
+                                ?>
+                                <img src="<?php echo $current_image; ?>" alt="Product" class="rounded-3 shadow-sm border" style="width: 44px; height: 44px; object-fit: cover; background: #fff;">
+                                <div>
+                                    <a href="view.php?id=<?php echo $product['id']; ?>" class="fw-bold text-dark text-decoration-none d-block mb-0.5" style="font-family: 'Inter', sans-serif;">
+                                        <?php echo htmlspecialchars($product['name']); ?>
+                                    </a>
+                                    <small class="text-secondary fw-semibold" style="font-size: 11px;">
+                                        <span class="bg-light px-2 py-0.5 rounded border text-muted">
+                                            <?php echo htmlspecialchars($product['category_name'] ?? $product['category'] ?? 'Other'); ?>
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
                         </td>
                         <td class="fw-bold text-dark">ETB <?php echo htmlspecialchars(number_format($product['price'], 2)); ?></td>
                         <td class="text-dark fw-semibold"><?php echo htmlspecialchars($product['stock']); ?> Packets</td>
