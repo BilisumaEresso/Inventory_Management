@@ -87,6 +87,92 @@ try {
     error_log('List Products Error: ' . $e->getMessage());
 }
 
+// ===================== HANDLE CSV EXPORT =====================
+if (isset($_GET['download']) && $_GET['download'] === 'all') {
+    // Disable any HTML output
+    ob_clean();
+    
+    // Use the same query logic as the main page (with search & category filter)
+    $search = trim($_GET['search'] ?? '');
+    $selected_category_id = trim($_GET['category_id'] ?? '');
+    
+    $query = '
+        SELECT 
+            p.id, 
+            p.name, 
+            COALESCE(c.name, p.category) as category_name, 
+            p.price, 
+            p.created_at, 
+            s.name as supplier_name 
+        FROM products p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        LEFT JOIN suppliers s ON p.supplier_id = s.id
+    ';
+    
+    $conditions = [];
+    $params = [];
+    
+    if ($search) {
+        $conditions[] = 'p.name LIKE ?';
+        $params[] = '%' . $search . '%';
+    }
+    if ($selected_category_id !== '') {
+        $conditions[] = 'p.category_id = ?';
+        $params[] = $selected_category_id;
+    }
+    if (!empty($conditions)) {
+        $query .= ' WHERE ' . implode(' AND ', $conditions);
+    }
+    $query .= ' ORDER BY p.created_at DESC';
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    $products_for_export = $stmt->fetchAll();
+    
+    // Add current stock for each product
+    foreach ($products_for_export as &$product) {
+        $product['stock'] = getCurrentStock($pdo, $product['id']);
+    }
+    
+    // Set headers to force download as CSV
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="products_export_' . date('Y-m-d') . '.csv"');
+    
+    // Open output stream
+    $output = fopen('php://output', 'w');
+    
+    // Add UTF-8 BOM for Excel compatibility
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    // Write CSV headers
+    fputcsv($output, [
+        'ID', 
+        'Product Name', 
+        'Category', 
+        'Supplier', 
+        'Price (ETB)', 
+        'Current Stock', 
+        'Created Date'
+    ]);
+    
+    // Write data rows
+    foreach ($products_for_export as $product) {
+        fputcsv($output, [
+            $product['id'],
+            $product['name'],
+            $product['category_name'] ?? 'Other',
+            $product['supplier_name'] ?? '—',
+            number_format($product['price'], 2),
+            $product['stock'],
+            date('Y-m-d', strtotime($product['created_at']))
+        ]);
+    }
+    
+    fclose($output);
+    exit; 
+}
+
+
 $page_title = 'Products Inventory';
 $path_prefix = '../';
 require_once '../includes/layout-start.php';
