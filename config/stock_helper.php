@@ -21,7 +21,7 @@ function getCurrentStock($pdo, $product_id) {
         ');
         $stmt->execute([$product_id]);
         $result = $stmt->fetch();
-        
+
         if ($result && $result['movement_count'] > 0) {
             return (int)$result['current_stock'];
         }
@@ -48,7 +48,7 @@ function getCurrentStock($pdo, $product_id) {
 function getStockStatus($quantity) {
     if ($quantity == 0) {
         return ['status' => 'Out of Stock', 'color' => '#d9534f', 'bg' => '#f2dede'];
-    } elseif ($quantity < 5) {
+    } elseif ($quantity < 15) {
         return ['status' => 'Low Stock', 'color' => '#ff9800', 'bg' => '#fff3cd'];
     } else {
         return ['status' => 'Available', 'color' => '#28a745', 'bg' => '#d4edda'];
@@ -114,7 +114,7 @@ function getStockStatistics($pdo) {
             $total_value += ($product['stock'] * $product['price']);
             if ($product['stock'] == 0) {
                 $out_of_stock++;
-            } elseif ($product['stock'] < 5) {
+            } elseif ($product['stock'] < 15) {
                 $low_stock++;
             }
         }
