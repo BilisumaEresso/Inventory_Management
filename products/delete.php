@@ -1,7 +1,10 @@
 <?php
-// Step 19: Delete Product
+/**
+ * Delete Product — with notification trigger
+ */
 require_once '../middleware/auth.php';
 require_once '../config/db.php';
+require_once '../config/notification_helper.php';
 
 $product_id = $_GET['id'] ?? null;
 
@@ -12,11 +15,26 @@ if (!$product_id || !is_numeric($product_id)) {
 }
 
 try {
-    // Delete product using prepared statement
+    // Fetch product name before deleting for notification
+    $stmt_name = $pdo->prepare('SELECT name FROM products WHERE id = ?');
+    $stmt_name->execute([$product_id]);
+    $product_name = $stmt_name->fetchColumn();
+
+    // Delete product
     $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
     $stmt->execute([$product_id]);
 
-    // Redirect back to list
+    // *** NEW: Create notification ***
+    if ($product_name) {
+        createNotification(
+            $pdo,
+            'Product Deleted',
+            '"' . $product_name . '" has been removed from the inventory catalog.',
+            'warning',
+            'products/list.php'
+        );
+    }
+
     $_SESSION['flash_msg'] = 'Product deleted successfully.';
     $_SESSION['flash_type'] = 'success';
     header('Location: list.php');
@@ -29,4 +47,3 @@ try {
     exit;
 }
 ?>
-

@@ -1,6 +1,7 @@
 <?php
 require_once '../middleware/auth.php';
 require_once '../config/db.php';
+require_once '../config/notification_helper.php';
 
 $category_id = $_GET['id'] ?? null;
 
@@ -10,7 +11,6 @@ if (!$category_id || !is_numeric($category_id)) {
 }
 
 try {
-    // Fetch category name first to check exist and protect system category
     $stmt_fetch = $pdo->prepare('SELECT name FROM categories WHERE id = ?');
     $stmt_fetch->execute([$category_id]);
     $cat_name = $stmt_fetch->fetchColumn();
@@ -20,7 +20,6 @@ try {
         exit;
     }
 
-    // Get 'Other' category ID to reassign products safely
     $stmt_other = $pdo->query("SELECT id FROM categories WHERE name = 'Other'");
     $other_id = $stmt_other->fetchColumn();
 
@@ -31,15 +30,22 @@ try {
 
     $pdo->beginTransaction();
 
-    // Reassign products to 'Other' category and update legacy text column
     $stmt_reassign = $pdo->prepare('UPDATE products SET category_id = ?, category = ? WHERE category_id = ?');
     $stmt_reassign->execute([$other_id, 'Other', $category_id]);
 
-    // Delete the category
     $stmt_delete = $pdo->prepare('DELETE FROM categories WHERE id = ?');
     $stmt_delete->execute([$category_id]);
 
     $pdo->commit();
+
+    // *** NEW: Create notification ***
+    createNotification(
+        $pdo,
+        'Category Deleted',
+        '"' . $cat_name . '" category has been removed. Products reassigned to "Other".',
+        'warning',
+        'categories/list.php'
+    );
 
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) {
@@ -50,3 +56,4 @@ try {
 
 header('Location: list.php');
 exit;
+?>

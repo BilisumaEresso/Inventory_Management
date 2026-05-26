@@ -2,6 +2,7 @@
 /**
  * Figma Redesigned Dashboard Screen - Smart Inventory Management System (SIMS)
  * Overhauled to perfectly match the Figma layout: Sales Overview, Purchase Overview, Charts, and Stock lists.
+ * Phase 1 Upgrade: Professional welcome header, quick stats, recent activity, enhanced polish.
  */
 require_once 'middleware/auth.php';
 require_once 'config/db.php';
@@ -103,6 +104,16 @@ try {
     ");
     $trend_data = $stmt_trend->fetchAll();
 
+    // Recent movements for activity feed
+    $stmt_recent = $pdo->query("
+        SELECT sm.movement_type, sm.quantity, sm.reason, sm.reference_no, sm.created_at, p.name as product_name
+        FROM stock_movements sm
+        JOIN products p ON sm.product_id = p.id
+        ORDER BY sm.created_at DESC
+        LIMIT 6
+    ");
+    $recent_movements = $stmt_recent->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     error_log('Dashboard Query Error: ' . $e->getMessage());
 }
@@ -112,7 +123,6 @@ try {
 // ----------------------------------------------------
 $sales_val_display = 'ETB ' . number_format($total_sales_value);
 $sales_cnt_display = $total_sales_count;
-
 $revenue_val_display = 'ETB ' . number_format($total_sales_value * 1.25); // Dynamic 25% markup
 $profit_val_display = 'ETB ' . number_format($total_sales_value * 0.25); // Dynamic 25% profit margin
 $cost_val_display = 'ETB ' . number_format($total_purchase_value);
@@ -137,7 +147,6 @@ for ($i = 5; $i >= 0; $i--) {
     $m_key = date('Y-m', strtotime("-$i months"));
     $m_lbl = date('M', strtotime("-$i months"));
     $chart_labels_list[] = $m_lbl;
-
     $in_val = 0;
     $out_val = 0;
     foreach ($trend_data as $row) {
@@ -180,7 +189,6 @@ for ($i = 4; $i >= 0; $i--) {
     $m_key = date('Y-m', strtotime("-$i months"));
     $m_lbl = date('M', strtotime("-$i months"));
     $order_labels_list[] = $m_lbl;
-
     $in_cnt = 0;
     $out_cnt = 0;
     foreach ($order_trend_data as $row) {
@@ -235,14 +243,52 @@ foreach ($all_products as $p) {
     }
 }
 
+// Current user info for greeting
+$user_name = $_SESSION['fullname'] ?? ($_SESSION['username'] ?? 'Administrator');
+$current_hour = (int)date('H');
+$greeting = 'Good Morning';
+if ($current_hour >= 12 && $current_hour < 17) $greeting = 'Good Afternoon';
+elseif ($current_hour >= 17) $greeting = 'Good Evening';
+
 // Include layout start
 $page_title = 'Dashboard';
 $path_prefix = '';
 require_once 'includes/layout-start.php';
 ?>
 
-<!-- Styled Layout Content -->
+<!-- Professional Dashboard Styles -->
 <style>
+    /* Welcome header */
+    .welcome-header {
+        background: linear-gradient(135deg, rgba(19,102,217,0.04) 0%, rgba(134,80,222,0.04) 50%, rgba(253,126,20,0.04) 100%);
+        border-radius: 16px;
+        padding: 24px 28px;
+        border: 1px solid var(--navbar-border);
+        margin-bottom: 24px;
+    }
+    .welcome-greeting {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+    .welcome-date {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+    .live-clock-badge {
+        font-family: 'Inter', monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: var(--navbar-bg);
+        border: 1px solid var(--navbar-border);
+        padding: 8px 16px;
+        border-radius: 8px;
+        letter-spacing: 1px;
+    }
+
+    /* Metric cards */
     .metric-title {
         font-size: 17.5px;
         font-weight: 700;
@@ -263,6 +309,25 @@ require_once 'includes/layout-start.php';
     .divider-vertical {
         border-right: 1px solid var(--navbar-border);
     }
+    .metric-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    /* Low stock */
     .low-stock-avatar {
         width: 36px;
         height: 36px;
@@ -278,16 +343,133 @@ require_once 'includes/layout-start.php';
         font-size: 11px !important;
         font-weight: 700 !important;
     }
+
+    /* Quick stats row */
+    .quick-stat-card {
+        background: white;
+        border: 1px solid var(--navbar-border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        transition: all 0.2s ease;
+        cursor: default;
+    }
+    .quick-stat-card:hover {
+        border-color: #1366d9;
+        box-shadow: 0 4px 12px rgba(19,102,217,0.08);
+    }
+    .quick-stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    .quick-stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    .quick-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    /* Recent activity */
+    .activity-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    .activity-dot.in { background-color: #198754; }
+    .activity-dot.out { background-color: #dc3545; }
+    .activity-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--navbar-border);
+        transition: background 0.15s ease;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: rgba(0,0,0,0.01); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .welcome-header { padding: 16px 18px; }
+        .welcome-greeting { font-size: 1.2rem; }
+        .metric-value { font-size: 18px; }
+        .quick-stat-value { font-size: 1.2rem; }
+        .divider-vertical { border-right: none; border-bottom: 1px solid var(--navbar-border); padding-bottom: 12px; margin-bottom: 12px; }
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .quick-stat-card { background: var(--card-bg); }
+    [data-bs-theme="dark"] .welcome-header { background: rgba(255,255,255,0.02); }
+    [data-bs-theme="dark"] .low-stock-avatar { background-color: rgba(255,255,255,0.08); }
 </style>
+
+<!-- Welcome Header -->
+<div class="welcome-header">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h1 class="welcome-greeting mb-1" id="greetingText"><?php echo $greeting; ?>, <?php echo htmlspecialchars($user_name); ?></h1>
+            <p class="welcome-date mb-0" id="currentDate"><?php echo date('l, F j, Y'); ?></p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="live-clock-badge" id="liveClock"><?php echo date('H:i:s'); ?></span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(19,102,217,0.08); color: #1366d9;"><i class="bi bi-box-seam"></i></div>
+            <div><div class="quick-stat-value"><?php echo number_format($total_products); ?></div><div class="quick-stat-label">Products</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(25,135,84,0.08); color: #198754;"><i class="bi bi-tags"></i></div>
+            <div><div class="quick-stat-value"><?php echo $categories_display; ?></div><div class="quick-stat-label">Categories</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(255,152,0,0.08); color: #ff9800;"><i class="bi bi-exclamation-triangle"></i></div>
+            <div><div class="quick-stat-value"><?php echo $low_stock; ?></div><div class="quick-stat-label">Low Stock</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(220,53,69,0.08); color: #dc3545;"><i class="bi bi-x-circle"></i></div>
+            <div><div class="quick-stat-value"><?php echo $out_of_stock; ?></div><div class="quick-stat-label">Out of Stock</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(134,80,222,0.08); color: #8650de;"><i class="bi bi-people"></i></div>
+            <div><div class="quick-stat-value"><?php echo $suppliers_display; ?></div><div class="quick-stat-label">Suppliers</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="quick-stat-card d-flex align-items-center gap-3">
+            <div class="quick-stat-icon" style="background: rgba(25,135,84,0.08); color: #198754;"><i class="bi bi-cash-stack"></i></div>
+            <div><div class="quick-stat-value"><?php echo 'ETB ' . number_format($total_value); ?></div><div class="quick-stat-label">Inventory Value</div></div>
+        </div>
+    </div>
+</div>
 
 <!-- Row 1: Sales Overview (8/12) & Inventory Summary (4/12) -->
 <div class="row g-4 mb-4">
     <!-- Sales Overview -->
     <div class="col-lg-8 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <h5 class="metric-title">Sales Overview</h5>
             <div class="row g-3">
-
                 <!-- Metric 1: Sales -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-2">
@@ -298,7 +480,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Sales</span>
                     </div>
                 </div>
-
                 <!-- Metric 2: Revenue -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -309,7 +490,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Revenue</span>
                     </div>
                 </div>
-
                 <!-- Metric 3: Profit -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -320,28 +500,25 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Profit</span>
                     </div>
                 </div>
-
                 <!-- Metric 4: Cost -->
                 <div class="col-md-3 col-6">
                     <div class="d-flex flex-column gap-1 ps-3">
-                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 38px; height: 38px; background-color: rgba(25, 135, 84, 0.08); color: #198754;">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 mb-2" style="width: 38px; height: 38px; background-color: rgba(25, 135, 84, 0.08); color: #198754;">
                             <i class="bi bi-wallet2 fs-5"></i>
                         </div>
                         <span class="metric-value" id="dashValValue"><?php echo $cost_val_display; ?></span>
                         <span class="metric-label">Cost</span>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <!-- Inventory Summary -->
     <div class="col-lg-4 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <h5 class="metric-title">Inventory Summary</h5>
             <div class="row g-3 h-100 align-items-center">
-
                 <!-- Metric 1: Quantity in Hand -->
                 <div class="col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1">
@@ -352,7 +529,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Quantity in Hand</span>
                     </div>
                 </div>
-
                 <!-- Metric 2: To be received -->
                 <div class="col-6">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -363,7 +539,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">To be received</span>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -373,10 +548,9 @@ require_once 'includes/layout-start.php';
 <div class="row g-4 mb-4">
     <!-- Purchase Overview -->
     <div class="col-lg-8 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <h5 class="metric-title">Purchase Overview</h5>
             <div class="row g-3">
-
                 <!-- Metric 1: Purchase -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-2">
@@ -387,7 +561,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Purchase</span>
                     </div>
                 </div>
-
                 <!-- Metric 2: Cost -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -398,7 +571,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Cost</span>
                     </div>
                 </div>
-
                 <!-- Metric 3: Cancel -->
                 <div class="col-md-3 col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -409,7 +581,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Cancel</span>
                     </div>
                 </div>
-
                 <!-- Metric 4: Return -->
                 <div class="col-md-3 col-6">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -420,17 +591,15 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Return</span>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <!-- Product Summary -->
     <div class="col-lg-4 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <h5 class="metric-title">Product Summary</h5>
             <div class="row g-3 h-100 align-items-center">
-
                 <!-- Metric 1: Number of Suppliers -->
                 <div class="col-6 divider-vertical">
                     <div class="d-flex flex-column gap-1">
@@ -441,7 +610,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Number of Suppliers</span>
                     </div>
                 </div>
-
                 <!-- Metric 2: Number of Categories -->
                 <div class="col-6">
                     <div class="d-flex flex-column gap-1 ps-3">
@@ -452,7 +620,6 @@ require_once 'includes/layout-start.php';
                         <span class="metric-label">Number of Categories</span>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -462,7 +629,7 @@ require_once 'includes/layout-start.php';
 <div class="row g-4 mb-4" id="analytics-section">
     <!-- Sales & Purchase Chart -->
     <div class="col-lg-8 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="fw-bold mb-0 text-dark" style="font-size: 16.5px;">Sales & Purchase</h5>
                 <button class="btn btn-sm btn-outline-secondary px-3 py-1.5 rounded-3 d-flex align-items-center gap-2" style="font-size: 12.5px; font-weight: 500;">
@@ -477,7 +644,7 @@ require_once 'includes/layout-start.php';
 
     <!-- Order Summary Chart -->
     <div class="col-lg-4 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <h5 class="fw-bold mb-4 text-dark" style="font-size: 16.5px;">Order Summary</h5>
             <div style="position: relative; height: 260px; width: 100%;">
                 <canvas id="orderChart"></canvas>
@@ -490,7 +657,7 @@ require_once 'includes/layout-start.php';
 <div class="row g-4 mb-4">
     <!-- Top Selling Stock -->
     <div class="col-lg-8 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 metric-card">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="fw-bold mb-0 text-dark" style="font-size: 16.5px;">Top Selling Stock</h5>
                 <a href="products/list.php" class="text-primary fw-bold text-decoration-none" style="font-size: 13.5px;">See All</a>
@@ -531,84 +698,142 @@ require_once 'includes/layout-start.php';
         </div>
     </div>
 
-    <!-- Low Quantity Stock -->
+    <!-- Low Quantity Stock + Recent Activity -->
     <div class="col-lg-4 col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0 text-dark" style="font-size: 16.5px;">Low Quantity Stock</h5>
-                <a href="products/list.php?filter=low_stock" class="text-primary fw-bold text-decoration-none" style="font-size: 13.5px;">See All</a>
-            </div>
-
-            <?php if (empty($low_stock_list)): ?>
-                <div class="d-flex flex-column align-items-center justify-content-center py-5 text-center h-100 justify-content-center">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 text-success" style="width: 54px; height: 54px; background-color: rgba(25, 135, 84, 0.08) !important;">
-                        <i class="bi bi-shield-check fs-4"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-1">All Stock Levels Healthy</h6>
-                    <p class="text-muted mb-0" style="font-size: 13px;">No products are currently low on stock (less than 15 units remaining).</p>
+        <div class="d-flex flex-column gap-4 h-100">
+            <!-- Low Quantity Stock -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 metric-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-dark" style="font-size: 16.5px;">Low Quantity Stock</h5>
+                    <a href="products/list.php?filter=low_stock" class="text-primary fw-bold text-decoration-none" style="font-size: 13.5px;">See All</a>
                 </div>
-            <?php else: ?>
-                <div class="d-flex flex-column gap-3">
-                    <?php foreach ($low_stock_list as $product): ?>
-                    <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-light">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="low-stock-avatar">
-                                <img src="<?php echo $product['image']; ?>" alt="Product Icon" style="width: 24px; height: 24px; object-fit: contain;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5164/5164023.png';">
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-0 text-dark"><?php echo htmlspecialchars($product['name']); ?></h6>
-                                <small class="text-muted">Remaining Quantity : <?php echo (int)$product['stock']; ?> Packet</small>
-                            </div>
+
+                <?php if (empty($low_stock_list)): ?>
+                    <div class="d-flex flex-column align-items-center justify-content-center py-5 text-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 text-success" style="width: 54px; height: 54px; background-color: rgba(25, 135, 84, 0.08) !important;">
+                            <i class="bi bi-shield-check fs-4"></i>
                         </div>
-                        <span class="badge badge-low px-3 py-2 rounded-pill">Low</span>
+                        <h6 class="fw-bold text-dark mb-1">All Stock Levels Healthy</h6>
+                        <p class="text-muted mb-0" style="font-size: 13px;">No products are currently low on stock (less than 15 units remaining).</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($low_stock_list as $item): ?>
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3" style="border-bottom: 1px solid var(--navbar-border);">
+                        <div class="low-stock-avatar">
+                            <img src="<?php echo $item['image']; ?>" alt="Product Icon" style="width: 24px; height: 24px; object-fit: contain;">
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-semibold text-dark"><?php echo htmlspecialchars($item['name']); ?></h6>
+                            <small class="text-muted">Remaining Quantity : <?php echo $item['stock']; ?> Packet</small>
+                        </div>
+                        <span class="badge badge-low">Low</span>
                     </div>
                     <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 metric-card flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark" style="font-size: 16.5px;">
+                        <i class="bi bi-clock-history me-2 text-primary"></i>Recent Activity
+                    </h5>
                 </div>
-            <?php endif; ?>
+
+                <?php if (empty($recent_movements)): ?>
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4 text-center flex-grow-1">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3 text-muted" style="width: 44px; height: 44px; background-color: rgba(0,0,0,0.04) !important;">
+                            <i class="bi bi-journal-text fs-5"></i>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size: 13px;">No recent activity yet. Start adding stock movements!</p>
+                    </div>
+                <?php else: ?>
+                    <div class="d-flex flex-column" style="max-height: 280px; overflow-y: auto;">
+                        <?php foreach ($recent_movements as $movement): ?>
+                        <div class="activity-item d-flex align-items-center gap-2">
+                            <span class="activity-dot <?php echo $movement['movement_type'] === 'IN' ? 'in' : 'out'; ?>"></span>
+                            <div class="flex-grow-1">
+                                <span class="fw-medium" style="font-size: 13px;">
+                                    <?php echo htmlspecialchars($movement['product_name']); ?>
+                                </span>
+                                <span class="text-muted" style="font-size: 12px;">
+                                    — <?php echo $movement['movement_type'] === 'IN' ? 'Stock in' : 'Stock out'; ?>
+                                    (<?php echo (int)$movement['quantity']; ?> units)
+                                    <?php if (!empty($movement['reason'])): ?>
+                                        · <?php echo htmlspecialchars($movement['reason']); ?>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <small class="text-muted" style="font-size: 11px; white-space: nowrap;">
+                                <?php echo date('M j, H:i', strtotime($movement['created_at'])); ?>
+                            </small>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Fast Track Workflows Card (Unobtrusive Footer action) -->
-<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge-fill text-primary"></i> Fast Track Workflows</h6>
-    <div class="d-flex flex-wrap gap-2">
-        <a href="products/add.php" class="btn btn-sm btn-outline-primary px-3 rounded-pill">Add Product</a>
-        <a href="products/list.php" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">View Inventory</a>
-        <a href="inventory/history.php" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">Inventory Logs</a>
-        <a href="suppliers/list.php" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">Suppliers List</a>
-        <a href="categories/list.php" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">Category Manager</a>
-        <button id="btnRefreshDash" class="btn btn-sm btn-primary px-4 rounded-pill"><i class="bi bi-arrow-clockwise"></i> Refresh Stats</button>
+<!-- Row 5: Fast Track Workflows -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h6 class="fw-bold text-dark mb-3" style="font-size: 16px;">&nbsp;Fast Track Workflows</h6>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="products/add.php" class="btn btn-primary rounded-3 px-3 py-2 d-flex align-items-center gap-2" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-plus-lg"></i> Add Product
+            </a>
+            <a href="products/list.php" class="btn btn-outline-secondary rounded-3 px-3 py-2 d-flex align-items-center gap-2" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-eye"></i> View Inventory
+            </a>
+            <a href="inventory/history.php" class="btn btn-outline-secondary rounded-3 px-3 py-2 d-flex align-items-center gap-2" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-journal-text"></i> Inventory Logs
+            </a>
+            <a href="suppliers/list.php" class="btn btn-outline-secondary rounded-3 px-3 py-2 d-flex align-items-center gap-2" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-truck"></i> Suppliers List
+            </a>
+            <a href="categories/list.php" class="btn btn-outline-secondary rounded-3 px-3 py-2 d-flex align-items-center gap-2" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-grid"></i> Category Manager
+            </a>
+            <button class="btn btn-outline-secondary rounded-3 px-3 py-2 d-flex align-items-center gap-2" onclick="location.reload()" style="font-size: 13px; font-weight: 500;">
+                <i class="bi bi-arrow-repeat"></i> Refresh Stats
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<?php require_once 'includes/layout-end.php'; ?>
 
-<!-- Chart rendering script -->
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<!-- Bar Chart: Sales & Purchase -->
 <script>
-    // Sales & Purchase Bar Chart (Figma Style)
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    new Chart(trendCtx, {
+document.addEventListener('DOMContentLoaded', function() {
+    const ctxBar = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctxBar, {
         type: 'bar',
         data: {
-            labels: <?php echo $chart_labels_json ?? $chart_labels_js; ?>,
+            labels: <?php echo $chart_labels_js; ?>,
             datasets: [
                 {
-                    label: 'Purchase',
+                    label: 'Purchase (IN)',
                     data: <?php echo $chart_purchase_js; ?>,
-                    backgroundColor: '#818cf8', // Beautiful light-indigo
+                    backgroundColor: 'rgba(134, 80, 222, 0.7)',
+                    borderColor: '#8650de',
+                    borderWidth: 1,
                     borderRadius: 6,
-                    borderSkipped: false,
-                    barThickness: 12
+                    borderSkipped: false
                 },
                 {
-                    label: 'Sales',
+                    label: 'Sales (OUT)',
                     data: <?php echo $chart_sales_js; ?>,
-                    backgroundColor: '#34d399', // Beautiful light-green
+                    backgroundColor: 'rgba(253, 126, 20, 0.7)',
+                    borderColor: '#fd7e14',
+                    borderWidth: 1,
                     borderRadius: 6,
-                    borderSkipped: false,
-                    barThickness: 12
+                    borderSkipped: false
                 }
             ]
         },
@@ -617,64 +842,52 @@ require_once 'includes/layout-start.php';
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 10,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: { family: 'Inter', size: 12, weight: '500' }
-                    }
+                    position: 'top',
+                    labels: { usePointStyle: true, padding: 16, font: { size: 12 } }
                 }
             },
             scales: {
-                x: {
-                    grid: { display: false }
-                },
                 y: {
                     beginAtZero: true,
-                    ticks: { precision: 0 },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 11 }, callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1) + 'k' : v; } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 11 } }
                 }
             }
         }
     });
 
-    // Order Summary Line Chart (Figma Style)
-    const orderCtx = document.getElementById('orderChart').getContext('2d');
-
-    // Create soft gradients
-    const gradOrdered = orderCtx.createLinearGradient(0, 0, 0, 200);
-    gradOrdered.addColorStop(0, 'rgba(251, 140, 0, 0.1)');
-    gradOrdered.addColorStop(1, 'rgba(251, 140, 0, 0.0)');
-
-    const gradDelivered = orderCtx.createLinearGradient(0, 0, 0, 200);
-    gradDelivered.addColorStop(0, 'rgba(59, 130, 246, 0.1)');
-    gradDelivered.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-
-    new Chart(orderCtx, {
+    // Line Chart: Order Summary
+    const ctxLine = document.getElementById('orderChart').getContext('2d');
+    new Chart(ctxLine, {
         type: 'line',
         data: {
             labels: <?php echo $order_labels_js; ?>,
             datasets: [
                 {
-                    label: 'Ordered',
+                    label: 'Orders (IN)',
                     data: <?php echo $ordered_data_js; ?>,
-                    borderColor: '#f97316', // Orange
-                    backgroundColor: gradOrdered,
-                    borderWidth: 2,
-                    tension: 0.4,
+                    borderColor: '#1366d9',
+                    backgroundColor: 'rgba(19, 102, 217, 0.08)',
                     fill: true,
-                    pointRadius: 0
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#1366d9',
+                    borderWidth: 2
                 },
                 {
-                    label: 'Delivered',
+                    label: 'Delivered (OUT)',
                     data: <?php echo $delivered_data_js; ?>,
-                    borderColor: '#3b82f6', // Blue
-                    backgroundColor: gradDelivered,
-                    borderWidth: 2,
-                    tension: 0.4,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.05)',
                     fill: true,
-                    pointRadius: 0
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#198754',
+                    borderWidth: 2
                 }
             ]
         },
@@ -683,72 +896,52 @@ require_once 'includes/layout-start.php';
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 10,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: { family: 'Inter', size: 12, weight: '500' }
-                    }
+                    position: 'top',
+                    labels: { usePointStyle: true, padding: 12, font: { size: 11 } }
                 }
             },
             scales: {
-                x: {
-                    grid: { display: false }
-                },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 11 }, stepSize: 1 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 11 } }
                 }
             }
         }
     });
+});
 </script>
 
-<!-- Real-Time Auto Polling & Update Bridge -->
+<!-- Live Clock Script -->
 <script>
-    async function refreshDashboardStats() {
-        try {
-            const response = await fetch('api/dashboard-stats.php');
-            const data = await response.json();
-
-            if (data.error) return;
-
-            // Mapping variables to IDs to trigger smooth real-time visual shifts
-            const statsMap = {
-                'dashValValue': 'ETB ' + Number(data.total_value).toLocaleString('en-US'),
-                'dashValUnits': data.total_units,
-                'dashValSuppliers': data.total_suppliers
-            };
-
-            for (const [id, val] of Object.entries(statsMap)) {
-                const el = document.getElementById(id);
-                if (el && el.textContent != val) {
-                    el.textContent = val;
-                    el.style.transition = 'background-color 0.3s';
-                    el.style.backgroundColor = 'rgba(19, 102, 217, 0.15)';
-                    setTimeout(() => { el.style.backgroundColor = 'transparent'; }, 1500);
-                }
-            }
-        } catch (e) {
-            console.error('[Dashboard] Stats auto-refresh failed:', e);
+(function() {
+    function updateClock() {
+        const now = new Date();
+        const clockEl = document.getElementById('liveClock');
+        if (clockEl) {
+            clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+        }
+        const dateEl = document.getElementById('currentDate');
+        if (dateEl) {
+            dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         }
     }
+    updateClock();
+    setInterval(updateClock, 1000);
 
-    // Refresh action
-    document.getElementById('btnRefreshDash').addEventListener('click', (e) => {
-        const btn = e.target;
-        const orig = btn.innerHTML;
-        btn.innerHTML = '⏳ Syncing...';
-        refreshDashboardStats();
-        setTimeout(() => { btn.innerHTML = orig; }, 800);
-    });
-
-    // Polling every 5s
-    setInterval(refreshDashboardStats, 5000);
+    // Dynamic greeting
+    const hour = new Date().getHours();
+    let greeting = 'Good Morning';
+    if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+    else if (hour >= 17) greeting = 'Good Evening';
+    const greetEl = document.getElementById('greetingText');
+    if (greetEl) {
+        const name = greetEl.textContent.split(', ')[1] || '';
+        greetEl.textContent = greeting + ', ' + name;
+    }
+})();
 </script>
-
-<?php
-// Include layout end
-require_once 'includes/layout-end.php';
-?>

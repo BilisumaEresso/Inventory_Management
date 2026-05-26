@@ -3,3 +3,678 @@
 body {
   font-family: Arial, sans-serif;
 }
+
+/*
+ * Smart Inventory Management System - Main Stylesheet
+ * Professional Dashboard Theme v2.0
+ * Built on Bootstrap 5.3 with CSS custom properties
+ */
+
+/* =============================================
+   CSS Custom Properties (Fallbacks)
+   ============================================= */
+:root {
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --text-secondary: #94a3b8;
+    --navbar-border: #e2e8f0;
+    --navbar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --bg-light: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --primary: #1366d9;
+    --success: #198754;
+    --warning: #fd7e14;
+    --danger: #dc3545;
+    --purple: #8650de;
+}
+
+/* =============================================
+   Base Typography
+   ============================================= */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+}
+
+/* =============================================
+   Card Enhancements
+   ============================================= */
+.card {
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+.shadow-sm { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important; }
+
+/* =============================================
+   Metric Cards Hover
+   ============================================= */
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* =============================================
+   Quick Action Buttons
+   ============================================= */
+.btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(19, 102, 217, 0.3);
+}
+
+/* =============================================
+   Table Enhancements
+   ============================================= */
+.table {
+    font-size: 0.9rem;
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom-width: 2px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 12px 8px;
+}
+
+/* =============================================
+   Badge Enhancements
+   ============================================= */
+.badge {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* =============================================
+   Sidebar Enhancements
+   ============================================= */
+.sidebar .nav-link {
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(19, 102, 217, 0.06);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(19, 102, 217, 0.1);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* =============================================
+   Scrollbar Styling
+   ============================================= */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-stat-card {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.quick-stat-card:nth-child(1) { animation-delay: 0.05s; }
+.quick-stat-card:nth-child(2) { animation-delay: 0.1s; }
+.quick-stat-card:nth-child(3) { animation-delay: 0.15s; }
+.quick-stat-card:nth-child(4) { animation-delay: 0.2s; }
+.quick-stat-card:nth-child(5) { animation-delay: 0.25s; }
+.quick-stat-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* =============================================
+   Responsive Fixes
+   ============================================= */
+@media (max-width: 992px) {
+    .welcome-greeting { font-size: 1.3rem; }
+    .metric-value { font-size: 18px; }
+    .quick-stat-value { font-size: 1.2rem; }
+}
+
+@media (max-width: 768px) {
+    body { font-size: 0.9rem; }
+    .card { border-radius: 10px; }
+    .card-body, .card.p-4 { padding: 1rem !important; }
+
+    .metric-title { font-size: 15px; margin-bottom: 12px; }
+    .metric-value { font-size: 16px; }
+    .metric-label { font-size: 11px; }
+
+    .welcome-header { padding: 14px 16px; }
+    .welcome-greeting { font-size: 1.1rem; }
+    .live-clock-badge { font-size: 0.9rem; padding: 6px 12px; }
+
+    .divider-vertical {
+        border-right: none !important;
+        border-bottom: 1px solid var(--navbar-border);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+    .divider-vertical:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+
+    .quick-stat-card { padding: 12px 14px; }
+    .quick-stat-icon { width: 36px; height: 36px; font-size: 1rem; }
+
+    .activity-item { padding: 10px 8px; }
+}
+
+@media (max-width: 576px) {
+    .row.g-4 { --bs-gutter-y: 0.75rem; }
+    .col-6 { padding-left: 6px; padding-right: 6px; }
+    .quick-stat-card { padding: 10px 12px; }
+    .quick-stat-value { font-size: 1.1rem; }
+    .quick-stat-label { font-size: 0.7rem; }
+}
+
+/* =============================================
+   Dark Mode Support
+   ============================================= */
+[data-bs-theme="dark"] body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .quick-stat-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .welcome-header {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .low-stock-avatar {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .activity-item {
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .live-clock-badge {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-bs-theme="dark"] .text-dark {
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .text-secondary {
+    color: #64748b !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    border-color: #475569;
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .table {
+    color: #e2e8f0;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+/* =============================================
+   Print Styles
+   ============================================= */
+@media print {
+    .sidebar, .top-navbar, .welcome-header, .btn {
+        display: none !important;
+    }
+    body { background: white; }
+    .card { box-shadow: none !important; border: 1px solid #ddd; }
+}
+
+/*
+ * Smart Inventory Management System – Global Polish Stylesheet
+ * Combines previous upgrades and adds universal polish for Phase 5.
+ */
+
+/* =============================================
+   CSS Custom Properties (Fallbacks)
+   ============================================= */
+:root {
+    --text-dark: #1d1f2c;
+    --text-muted: #667085;
+    --text-secondary: #94a3b8;
+    --navbar-border: #e2e8f0;
+    --navbar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --bg-light: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --success: #198754;
+    --warning: #fd7e14;
+    --danger: #dc3545;
+    --purple: #8650de;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 30px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+}
+
+/* =============================================
+   Base Typography
+   ============================================= */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--body-bg);
+    color: var(--body-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* =============================================
+   Cards
+   ============================================= */
+.card, .card-custom {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover, .card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* =============================================
+   Buttons
+   ============================================= */
+.btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    border-radius: var(--radius-pill);
+    padding: 8px 20px;
+    transition: all var(--transition-base);
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+    border: none;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.35);
+    filter: brightness(1.05);
+}
+
+.btn-outline-primary {
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+}
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    border: 1.5px solid var(--navbar-border);
+    color: var(--body-color);
+    background: var(--card-bg);
+}
+.btn-outline-secondary:hover {
+    background: var(--body-bg);
+    color: var(--text-dark);
+    border-color: var(--navbar-border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    border: none;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25);
+}
+.btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(220, 53, 69, 0.35);
+}
+
+.btn-sm {
+    font-size: 12px;
+    padding: 6px 14px;
+}
+
+.btn-lg {
+    font-size: 15px;
+    padding: 10px 24px;
+}
+
+/* =============================================
+   Forms
+   ============================================= */
+.form-control, .form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    color: var(--input-color) !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+    outline: 0 !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.input-group-text {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+/* =============================================
+   Tables
+   ============================================= */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+.table th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    background-color: var(--table-th-bg);
+    border-bottom: 2px solid var(--table-th-border);
+    padding: 14px 18px;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--table-td-color);
+    border-bottom: 1px solid var(--table-td-border);
+    vertical-align: middle;
+    background: transparent;
+}
+
+.table-hover tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--table-th-bg);
+}
+
+/* =============================================
+   Badges
+   ============================================= */
+.badge {
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    padding: 5px 12px;
+    font-size: 11px;
+    letter-spacing: 0.2px;
+}
+
+.bg-success-subtle {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+}
+.bg-danger-subtle {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+}
+.bg-warning-subtle {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+}
+.bg-info-subtle {
+    background-color: #e0f2fe !important;
+    color: #0c4a6e !important;
+}
+
+/* =============================================
+   Empty States
+   ============================================= */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state .empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(79, 70, 229, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 28px;
+    color: var(--primary);
+}
+
+.empty-state h5 {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 360px;
+    margin-bottom: 20px;
+}
+
+/* =============================================
+   Modals
+   ============================================= */
+.modal-content {
+    border-radius: var(--radius-lg);
+    border: none;
+    box-shadow: var(--shadow-lg);
+    background: var(--card-bg);
+    color: var(--text-dark);
+}
+
+.modal-header {
+    padding: 20px 24px 10px;
+    border-bottom: none;
+}
+
+.modal-body {
+    padding: 10px 24px 20px;
+}
+
+.modal-footer {
+    padding: 10px 24px 20px;
+    border-top: none;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* =============================================
+   Alerts / Feedback
+   ============================================= */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* =============================================
+   Micro-interactions
+   ============================================= */
+a, button {
+    transition: all var(--transition-fast);
+}
+
+.btn:active, .btn:focus {
+    box-shadow: none !important;
+}
+
+/* Subtle scale on icon hover inside buttons */
+.btn i {
+    transition: transform 0.15s ease;
+}
+.btn:hover i {
+    transform: scale(1.1);
+}
+
+/* =============================================
+   Responsive Tweaks
+   ============================================= */
+@media (max-width: 768px) {
+    .table th, .table td {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+    .card-body, .card.p-4 {
+        padding: 1rem !important;
+    }
+    .empty-state {
+        padding: 40px 16px;
+    }
+    .btn {
+        padding: 6px 16px;
+        font-size: 12px;
+    }
+}
+
+/* =============================================
+   Dark Mode Overrides
+   ============================================= */
+[data-bs-theme="dark"] .bg-success-subtle {
+    background-color: rgba(25,135,84,0.15) !important;
+    color: #4ade80 !important;
+}
+[data-bs-theme="dark"] .bg-danger-subtle {
+    background-color: rgba(220,53,69,0.15) !important;
+    color: #f87171 !important;
+}
+[data-bs-theme="dark"] .bg-warning-subtle {
+    background-color: rgba(226,135,67,0.15) !important;
+    color: #fbbf24 !important;
+}
+[data-bs-theme="dark"] .empty-state .empty-icon {
+    background: rgba(255,255,255,0.06);
+}

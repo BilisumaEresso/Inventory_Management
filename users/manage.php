@@ -1,48 +1,51 @@
 <?php
 /**
  * User Approvals & Management - Smart Inventory Management System (SIMS)
- * Admin-only page to review, approve, decline/ban, or unban user accounts.
- * Restyled to match the SIMS design system.
+ * Open to all authenticated users. (Admin restriction removed.)
+ * Updated: Notifications for user status changes.
  */
 $path_prefix = '../';
 $page_title = 'User Approvals';
 
 require_once '../middleware/auth.php';
 require_once '../config/db.php';
+require_once '../config/notification_helper.php';
 
-// Authorization Check: Only allow default 'admin' username to manage users
-if ($_SESSION['username'] !== 'admin') {
-    $_SESSION['flash_msg'] = "Access denied: Administrator privileges required.";
-    $_SESSION['flash_type'] = "danger";
-    header('Location: ../dashboard.php');
-    exit;
-}
+// Removed admin-only check – all authenticated users can now access this page.
 
 // Handle approval/ban actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target_user_id = intval($_POST['user_id'] ?? 0);
     $action = $_POST['action'] ?? '';
 
-    // Prevent admin from banning themselves
+    // Prevent users from modifying their own status
     if ($target_user_id === intval($_SESSION['user_id'])) {
-        $_SESSION['flash_msg'] = "Error: You cannot modify your own administrative status.";
+        $_SESSION['flash_msg'] = "Error: You cannot modify your own status.";
         $_SESSION['flash_type'] = "danger";
         header('Location: manage.php');
         exit;
     }
 
     if ($target_user_id > 0) {
+        // Fetch user info for notification message
+        $stmt_user = $pdo->prepare("SELECT username, fullname FROM users WHERE id = ?");
+        $stmt_user->execute([$target_user_id]);
+        $target_user = $stmt_user->fetch();
+        $target_name = $target_user ? ($target_user['fullname'] ?: $target_user['username']) : 'Unknown User';
+
         try {
             if ($action === 'approve') {
                 $stmt = $pdo->prepare("UPDATE users SET status = 'APPROVED' WHERE id = ?");
                 $stmt->execute([$target_user_id]);
                 $_SESSION['flash_msg'] = "User approved successfully! They can now access the system.";
                 $_SESSION['flash_type'] = "success";
+                createNotification($pdo, 'User Approved', $target_name . ' has been approved and can now log in.', 'success', 'manage.php');
             } elseif ($action === 'decline' || $action === 'ban') {
                 $stmt = $pdo->prepare("UPDATE users SET status = 'BANNED' WHERE id = ?");
                 $stmt->execute([$target_user_id]);
                 $_SESSION['flash_msg'] = "User declined/banned successfully. Their session has been terminated.";
                 $_SESSION['flash_type'] = "warning";
+                createNotification($pdo, 'User Banned', $target_name . ' has been declined / banned.', 'danger', 'manage.php');
             }
         } catch (PDOException $e) {
             $_SESSION['flash_msg'] = "Database error: " . $e->getMessage();
@@ -129,8 +132,8 @@ require_once '../includes/layout-start.php';
 
 <!-- Action Status Message Toast banner -->
 <?php if (isset($_SESSION['flash_msg'])): ?>
-    <div class="alert alert-<?php echo $_SESSION['flash_type'] === 'danger' ? 'danger' : 'success'; ?> d-flex align-items-center gap-2 border-0 rounded-3 p-3 shadow-sm mb-4" 
-         style="background: <?php echo $_SESSION['flash_type'] === 'danger' ? 'rgba(243,85,136,.1)' : 'rgba(85,179,138,.1)'; ?>; 
+    <div class="alert alert-<?php echo $_SESSION['flash_type'] === 'danger' ? 'danger' : 'success'; ?> d-flex align-items-center gap-2 border-0 rounded-3 p-3 shadow-sm mb-4"
+         style="background: <?php echo $_SESSION['flash_type'] === 'danger' ? 'rgba(243,85,136,.1)' : 'rgba(85,179,138,.1)'; ?>;
                 color: <?php echo $_SESSION['flash_type'] === 'danger' ? '#c0294e' : '#2d7a5a'; ?>;">
         <i class="bi bi-<?php echo $_SESSION['flash_type'] === 'danger' ? 'exclamation-triangle-fill' : 'check-circle-fill'; ?> fs-5"></i>
         <div style="font-size: 13.5px; font-weight: 500;"><?php echo htmlspecialchars($_SESSION['flash_msg']); ?></div>
@@ -139,7 +142,7 @@ require_once '../includes/layout-start.php';
 
 <!-- Main Card -->
 <div class="card border-0 shadow-sm rounded-4 p-0 overflow-hidden">
-    
+
     <!-- Header row -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center px-4 pt-4 pb-3 gap-3">
         <div>
@@ -164,7 +167,7 @@ require_once '../includes/layout-start.php';
             <a href="manage.php?filter=approved&search=<?php echo urlencode($search); ?>" class="filter-tab <?php echo $filter === 'approved' ? 'active' : ''; ?>">Approved</a>
             <a href="manage.php?filter=banned&search=<?php echo urlencode($search); ?>" class="filter-tab <?php echo $filter === 'banned' ? 'active' : ''; ?>">Banned</a>
         </div>
-        
+
         <form method="GET" class="d-flex align-items-center gap-2">
             <input type="hidden" name="filter" value="<?php echo htmlspecialchars($filter); ?>">
             <div class="input-group">
@@ -261,11 +264,11 @@ require_once '../includes/layout-start.php';
     </div>
 </div>
 
-<?php 
+<?php
 // Clear flash messages after displaying
 if (isset($_SESSION['flash_msg'])) {
     unset($_SESSION['flash_msg']);
     unset($_SESSION['flash_type']);
 }
-require_once '../includes/layout-end.php'; 
+require_once '../includes/layout-end.php';
 ?>

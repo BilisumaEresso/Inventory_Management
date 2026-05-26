@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Generate unique username from name or email
                 $base_username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode('@', $email)[0]));
                 $username = $base_username;
-                
+
                 // Idempotency: append suffix if username exists
                 $check_stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
                 $check_stmt->execute([$username]);
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Insert into users
                 $insert_stmt = $pdo->prepare('
-                    INSERT INTO users (username, email, fullname, password, status) 
+                    INSERT INTO users (username, email, fullname, password, status)
                     VALUES (?, ?, ?, ?, "PENDING")
                 ');
                 $insert_stmt->execute([$username, $email, $fullname, $hashed_password]);
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Google Identity Services (GIS) library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-right: 1px solid rgba(0, 0, 0, 0.05);
             transition: background-color 0.3s ease;
         }
-        
+
         [data-bs-theme="dark"] .left-banner {
             border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -507,7 +507,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <div class="split-container">
-        
+
         <!-- Left Side: Brand Showcase -->
         <div class="left-banner">
             <img src="../assets/images/logo.png" alt="SIMS Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5164/5164023.png';">
@@ -517,14 +517,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Right Side: Interactive Form -->
         <div class="right-form">
-            
+
             <!-- Floating Theme Toggle Switch -->
             <button class="theme-toggle-floating" id="themeBtn" title="Toggle Theme">
                 <i class="bi bi-sun-fill" id="themeIcon"></i>
             </button>
 
             <div class="form-wrapper">
-                
+
                 <!-- Small branding header (visible on mobile/desktop form container top) -->
                 <div class="text-center d-lg-none">
                     <img src="../assets/images/logo.png" class="small-brand-logo" alt="SIMS Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/5164/5164023.png';">
@@ -545,7 +545,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <form method="POST" autocomplete="off" id="signupForm">
-                    
+
                     <div class="mb-3">
                         <label for="fullname" class="form-label">Name*</label>
                         <input type="text" id="fullname" name="fullname" class="form-control" placeholder="Enter your name" required>
@@ -564,7 +564,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <button type="submit" class="btn btn-submit mb-3">Get started</button>
 
-                    <button type="button" class="btn btn-google" id="googleSignUpBtn">
+                    <button disabled type="button" class="btn btn-google" id="googleSignUpBtn">
                         <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -601,9 +601,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <button type="button" class="btn-close shadow-none btn-close-white" id="mockModalCloseBtn" style="font-size: 12px;"></button>
             </div>
-            
+
             <p class="text-secondary mb-3" style="font-size: 13px;">Choose an account to continue to <strong>SIMS</strong></p>
-            
+
             <div class="mock-account-item" onclick="selectMockAccount('Jane Doe', 'jane.doe@gmail.com', 'google_jane_doe_123')">
                 <div class="mock-avatar" style="background-color: #ea4335;">J</div>
                 <div>
@@ -611,7 +611,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="mock-account-email">jane.doe@gmail.com</p>
                 </div>
             </div>
-            
+
             <div class="mock-account-item" onclick="selectMockAccount('Alex Smith', 'alex.smith@example.com', 'google_alex_smith_456')">
                 <div class="mock-avatar" style="background-color: #4285f4;">A</div>
                 <div>
@@ -619,7 +619,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="mock-account-email">alex.smith@example.com</p>
                 </div>
             </div>
-            
+
             <div class="mock-account-item" onclick="selectMockAccount('Sarah Jenkins', 'sarah.j@outlook.com', 'google_sarah_j_789')">
                 <div class="mock-avatar" style="background-color: #34a853;">S</div>
                 <div>
@@ -703,7 +703,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Handle selection inside simulated modal
         function selectMockAccount(name, email, google_id) {
             hideMockGoogleModal();
-            
+
             // Post payload to callback handler
             const payload = {
                 is_mock: true,

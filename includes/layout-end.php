@@ -1,7 +1,7 @@
-            </div> <!-- Close container-fluid -->
+</div> <!-- Close container-fluid -->
         </div> <!-- Close main-content -->
     </div> <!-- Close app-container -->
-    
+
     <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom sidebar toggle script for responsive screens -->
@@ -10,13 +10,13 @@
             const toggleBtn = document.getElementById("sidebarToggle");
             const sidebar = document.querySelector(".sidebar");
             const mainContent = document.querySelector(".main-content");
-            
+
             if (toggleBtn && sidebar) {
                 toggleBtn.addEventListener("click", function(e) {
                     e.stopPropagation();
                     sidebar.classList.toggle("show");
                 });
-                
+
                 if (mainContent) {
                     mainContent.addEventListener("click", function() {
                         if (sidebar.classList.contains("show")) {
@@ -34,7 +34,7 @@
         <div id="liveToast" class="toast align-items-center text-white border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(8px); min-width: 250px;">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2.5 py-3">
-                    <?php 
+                    <?php
                     $type = $_SESSION['flash_type'] ?? 'success';
                     $icon = 'bi-check-circle-fill text-success';
                     if ($type === 'danger') $icon = 'bi-exclamation-octagon-fill text-danger';
@@ -57,27 +57,27 @@
             }
         });
     </script>
-    <?php 
-    unset($_SESSION['flash_msg']); 
-    unset($_SESSION['flash_type']); 
+    <?php
+    unset($_SESSION['flash_msg']);
+    unset($_SESSION['flash_type']);
     ?>
     <?php endif; ?>
 
     <!-- Global Delete Confirmation Modal -->
     <div class="modal fade" id="globalDeleteConfirmModal" tabindex="-1" aria-labelledby="globalDeleteConfirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-            <div class="modal-content border-0 shadow rounded-4 p-3" style="background-color: #ffffff;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content border-0 shadow rounded-4 p-3">
                 <div class="modal-header border-0 pb-0">
-                    <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="globalDeleteConfirmModalLabel">
+                    <h6 class="modal-title fw-bold d-flex align-items-center gap-2" id="globalDeleteConfirmModalLabel">
                         <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i> Confirm Deletion
                     </h6>
-                    <button type="button" class="btn-close shadow-none animate-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-3">
-                    <p id="globalDeleteModalBodyText" class="text-secondary mb-0" style="font-size: 13.5px; line-height: 1.5;">Are you sure you want to delete this item? This action is permanent and cannot be undone.</p>
+                    <p id="globalDeleteModalBodyText" class="text-secondary mb-0" style="font-size: 14px; line-height: 1.6;">Are you sure you want to delete this item? This action is permanent and cannot be undone.</p>
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-2.5 rounded-3 fw-semibold text-secondary" data-bs-dismiss="modal" style="font-size: 13px;">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-light border flex-grow-1 py-2.5 rounded-3 fw-semibold" data-bs-dismiss="modal" style="font-size: 13px;">Cancel</button>
                     <a id="globalDeleteModalBtn" href="#" class="btn btn-sm btn-danger flex-grow-1 py-2.5 rounded-3 fw-bold" style="font-size: 13px;">Delete Item</a>
                 </div>
             </div>
@@ -88,7 +88,7 @@
             const modalEl = document.getElementById('globalDeleteConfirmModal');
             if (modalEl) {
                 const modal = new bootstrap.Modal(modalEl);
-                document.getElementById('globalDeleteModalBodyText').innerText = messageText;
+                document.getElementById('globalDeleteModalBodyText').innerHTML = messageText;
                 document.getElementById('globalDeleteModalBtn').href = deleteUrl;
                 modal.show();
             }
