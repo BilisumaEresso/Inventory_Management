@@ -62,6 +62,14 @@ $prefix = isset($path_prefix) ? $path_prefix : '';
             </a>
         </li>
 
+        <!-- 7. Manage User -->
+        <li class="menu-item <?php echo ($current_dir === 'users') ? 'active' : ''; ?>"
+            <a href="<?php echo $prefix; ?>users/manage.php">
+                <i class="bi bi-person-check-fill"></i>
+                <span>Manage User</span>
+            </a>
+        </li>
+
         <!-- Admin user approvals center -->
         <?php if (isset($_SESSION['username']) && $_SESSION['username'] === 'admin'): ?>
         <li class="menu-item <?php echo ($current_dir === 'users') ? 'active' : ''; ?>">
